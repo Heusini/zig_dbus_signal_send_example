@@ -22,6 +22,13 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const receiver = b.addExecutable(.{
+        .name = "receiver",
+        .root_source_file = b.path("src/dbus_receiver.zig"),
+        .target = target,
+        .optimize = optimize,
+    });
+
     exe.linkLibC();
     // exe.linkLibCpp();
     exe.linkSystemLibrary("dbus-1");
@@ -30,10 +37,15 @@ pub fn build(b: *std.Build) void {
     // step when running `zig build`).
     b.installArtifact(exe);
 
+    receiver.linkLibC();
+    receiver.linkSystemLibrary("dbus-1");
+    b.installArtifact(receiver);
+
     // This *creates* a Run step in the build graph, to be executed when another
     // step is evaluated that depends on it. The next line below will establish
     // such a dependency.
-    const run_cmd = b.addRunArtifact(exe);
+    // const run_cmd = b.addRunArtifact(exe);
+    const run_cmd = b.addRunArtifact(receiver);
 
     // By making the run step depend on the install step, it will be run from the
     // installation directory rather than directly from within the cache directory.
